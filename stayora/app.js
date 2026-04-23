@@ -1,9 +1,6 @@
+const listings=require("./routes/listing.js");
+const reviews=require("./routes/review.js");
 const mongoose=require("mongoose");
-const {listingSchema, reviewSchema}=require("./schema.js");
-const wrapAsync=require("./utils/wrapAsync.js");
-const ExpressError=require("./utils/ExpressError.js");
-const Listing=require("./models/listing.js");
-const Review=require("./models/review.js");
 const path=require("path");
 const methodOverride=require("method-override");
 const ejsMate=require("ejs-mate");
@@ -35,97 +32,8 @@ app.get("/", (req, res)=>{
     res.send("Hi, I am root!");
 });
 
-const validateListing=(req, res, next)=>{
-    let {error}=listingSchema.validate(req.body);
-    if(error){
-        let errMsg=error.details.map((el)=>el.message).join(",");
-        return next(new ExpressError(400, errMsg));
-    }
-    else{
-        return next();
-    }
-};
-
-const validateReview=(req, res, next)=>{
-    let {error}=reviewSchema.validate(req.body);
-    if(error){
-        let errMsg=error.details.map((el)=>el.message).join(",");
-        return next(new ExpressError(400, errMsg));
-    }
-    else{
-        return next();
-    }
-}
-
-// app.get("/testListing", async (req, res)=>{
-//     let sampleListing=new Listing({
-//         title:"Sample Villa",
-//         description:"sample sample",
-//         price:6969,
-//         location:"Hyderabad, Telangana",
-//         country:"India"
-//     });
-//     await sampleListing.save();
-//     console.log("sample saved");
-//     res.send("sample saved");
-// });
-
-app.get("/listings", wrapAsync(async(req, res, next)=>{
-    let allListings=await Listing.find({});
-    res.render("listings/index", {allListings});
-}));
-
-app.post("/listings", validateListing, wrapAsync(async(req, res, next)=>{
-    let listing=new Listing(req.body.listing);
-    await listing.save();
-    res.redirect("/listings");
-}));
-
-app.get("/listings/new", (req, res)=>{
-    res.render("listings/new");
-});
-
-app.get("/listings/:id", wrapAsync(async(req, res, next)=>{
-    let {id}=req.params;
-    let listing=await Listing.findById(id).populate("reviews");
-    res.render("listings/show", {listing});
-}));
-
-app.put("/listings/:id", validateListing, wrapAsync(async(req, res, next)=>{
-    let {id}=req.params;
-    let listing=await Listing.findByIdAndUpdate(id, {...req.body.listing});
-    res.redirect(`/listings/${id}`);
-}));
-
-app.delete("/listings/:id", wrapAsync(async(req, res, next)=>{
-    let {id}=req.params;
-    let deletedListing=await Listing.findByIdAndDelete(id);
-    console.log(deletedListing);
-    res.redirect("/listings");
-}));
-
-app.get("/listings/:id/edit", wrapAsync(async(req, res, next)=>{
-    let {id}=req.params;
-    let listing=await Listing.findById(id);
-    res.render("listings/edit", {listing});
-}));
-
-app.post("/listings/:id/reviews", validateReview, wrapAsync(async(req, res, next)=>{
-    let listing=await Listing.findById(req.params.id);
-    let newReview=new Review(req.body.review);
-    listing.reviews.push(newReview);
-    await newReview.save();
-    await listing.save();
-    console.log("review saved");
-    res.redirect(`/listings/${listing._id}`);
-}));
-
-app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async(req, res, next)=>{
-    let {id, reviewId}=req.params;
-    await Listing.findByIdAndUpdate(id, {$pull: {reviews: reviewId}});
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/listings/${id}`);
-}));
+app.use("/listings", listings);
+app.use("/listings/:id/reviews", reviews);
 
 app.use((req, res, next)=>{
     return next(new ExpressError(404, "Page Not Found!"));

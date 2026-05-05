@@ -83,7 +83,7 @@ body {
     border-radius: 1rem;
 }
 
-.add-btn, .edit-btn {
+.add-btn, .edit-btn, .signup-btn, .login-btn {
     background-color: #fe424d;
     border: none;
     color: white;

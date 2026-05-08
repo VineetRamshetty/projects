@@ -1,4 +1,8 @@
 <%-layout("/layouts/boilerplate")%>
+<script>
+    let mapboxToken="<%=process.env.MAPBOX_TOKEN%>";
+    let listing=<%- JSON.stringify(listing)%>;
+</script>
 <body>
     <br>
     <div class="row">
@@ -52,8 +56,9 @@
                 </form>
                 <hr>
             <%}%>
-            <p><b>All Reviews</b></p>
+            <%if(listing.reviews.length>0){%>
                 <div class="row">
+                    <p><b>All Reviews</b></p>
                     <%for(let review of listing.reviews){%>
                     <div class="card col-5 mb-3 ms-3">
                         <div class="card-body">
@@ -67,9 +72,15 @@
                             </form>
                         <%}%>
                     </div>
-                <%}%>
-            </div>
+                    <%}%>
+                </div>
+            <%}%>
+        </div>
+        <div class="col-8 offset-2 mb-3">
+            <h3>Where you'll be</h3>
+            <div id="map"></div>
         </div>
     </div>
     <br><br>
 </body>
+<script src="/js/map.js"></script>

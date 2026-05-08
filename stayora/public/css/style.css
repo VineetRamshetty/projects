@@ -92,3 +92,12 @@ body {
 .show-btns {
     display: flex;
 }
+
+.edit-img {
+    width: 250px;
+}
+
+#map {
+    height:400px;
+    width:auto;
+}
